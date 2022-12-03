@@ -1,0 +1,12 @@
+POST http://localhost:8080/api/trees HTTP/1.1
+content-type: application/json
+
+{
+    "name": "test_post",
+    "numberPlanted": "10",
+    "location": {
+        "latitude":60.242,
+        "longitude":180.353
+        },
+    "image": "/Users/danielnikkari/Downloads/png-clipart-rick-and-morty-hq-resource-rick-and-morty-portal-gun-illustration.png"
+}

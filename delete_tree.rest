@@ -1,0 +1,1 @@
+DELETE http://localhost:8080/api/trees/638b59a5e8ac10f1c6422114 HTTP/1.1
