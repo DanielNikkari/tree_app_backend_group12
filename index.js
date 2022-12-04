@@ -1,5 +1,4 @@
 require('dotenv').config()
-console.log(process.env.MONGODB_URI)
 const express = require('express')
 const morgan = require('morgan')
 const { Tree, TreeUpdate } = require('./tree')
@@ -58,7 +57,6 @@ app.get('/info', (request, response) => {
 })
 
 app.get('/api/trees/:id', (request, response, next) => {
-
   Tree.findById(request.params.id).then(trees => {
     response.json(trees)
   })
@@ -148,6 +146,13 @@ app.put('/api/trees/:id', (request, response, next) => {
       response.json(updateTree)
     })
     .catch(error => next(error))
+})
+
+app.get('/api/trees/getupdates/:treeId', (request, response, next) => {
+  TreeUpdate.find({ treeId: request.params.treeId }).then(treeUpdates => {
+    response.json(treeUpdates)
+  })
+  .catch(error => next(error))
 })
 
 app.get('*', (req,res) =>{
