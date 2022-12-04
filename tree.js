@@ -2,8 +2,6 @@ const mongoose = require('mongoose')
 
 const url = process.env.MONGO_URI
 
-console.log(`Connecting to ${url}`)
-
 mongoose.connect(url)
   .then(result => { // eslint-disable-line no-unused-vars
     console.log('Connected to MongoDB')
@@ -44,6 +42,21 @@ const treeSchema = new mongoose.Schema({
   image: { data: Buffer, contentType: String },
 }, { timestamps: true })
 
+const treeUpdateSchema = new mongoose.Schema({
+  treeId: {
+    type: String,
+    required: true
+  },
+  user: {
+    type: String,
+    default: "unnamed"
+  },
+  text: {
+    type: String
+  },
+  image: { data: Buffer, contentType: String },
+}, { timestamps: true })
+
 treeSchema.set('toJSON', {
   transform: (document, returnedObject) => {
     returnedObject.id = returnedObject._id.toString()
@@ -52,4 +65,15 @@ treeSchema.set('toJSON', {
   }
 })
 
-module.exports = mongoose.model('Tree', treeSchema)
+treeUpdateSchema.set('toJSON', {
+  transform: (document, returnedObject) => {
+    returnedObject.id = returnedObject._id.toString()
+    delete returnedObject._id
+    delete returnedObject.__v
+  }
+})
+
+const Tree = mongoose.model('Tree', treeSchema)
+const TreeUpdate = mongoose.model('TreeUpdate', treeUpdateSchema)
+
+module.exports = { Tree, TreeUpdate }

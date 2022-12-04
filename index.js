@@ -2,12 +2,11 @@ require('dotenv').config()
 console.log(process.env.MONGODB_URI)
 const express = require('express')
 const morgan = require('morgan')
-const Tree = require('./tree')
+const { Tree, TreeUpdate } = require('./tree')
 const cors = require('cors')
 const multer = require('multer')
 const fs = require('fs')
 const path = require('path')
-
 
 const app = express()
 
@@ -41,6 +40,7 @@ const upload = multer({ storage: storage })
 
 
 app.get('/api/trees', (request, response) => {
+  console.log("Tree", Tree)
   Tree.find({}).then(trees => {
   // response.json(trees)
     response.json(trees)
@@ -101,6 +101,28 @@ app.post('/api/trees', upload.single('image'), (request, response, next) => {
   
 })
 
+app.post('/api/trees/:id/update', upload.single('image'), (request, response, next) => {
+
+  console.log("id", request.params.id)
+
+  const treeUpdate = new TreeUpdate({
+    treeId: request.params.id,
+    user: request.body.user,
+    text: request.body.text,
+    image: {
+      data: fs.readFileSync(path.join(__dirname + '/uploads/' + request.file.filename)),
+      contentType: request.file.mimetype,
+    }
+  })
+
+  treeUpdate.save().then(savedUpdate => {
+    response.json(savedUpdate)
+  })
+  .catch(error => {
+    next(error)
+  })
+})
+
 app.delete('/api/trees/:id', (request, response, next) => {
 
   Tree.findByIdAndRemove(request.params.id).then(result => { // eslint-disable-line no-unused-vars
@@ -128,11 +150,15 @@ app.put('/api/trees/:id', (request, response, next) => {
     .catch(error => next(error))
 })
 
-const unknownEndpoint = (request, response) => {
-  response.status(404).send({ error: 'unknown endpoint' })
-}
+app.get('*', (req,res) =>{
+  res.sendFile(path.join(__dirname+'/build/index.html'));
+});
 
-app.use(unknownEndpoint)
+// const unknownEndpoint = (request, response) => {
+//   response.status(404).send({ error: 'unknown endpoint' })
+// }
+
+// app.use(unknownEndpoint)
 
 const errorHandler = (error, request, response, next) => {
   console.log(error.message)
