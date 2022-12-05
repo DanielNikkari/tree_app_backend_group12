@@ -1,11 +1,15 @@
 require('dotenv').config()
 const express = require('express')
 const morgan = require('morgan')
-const { Tree, TreeUpdate } = require('./tree')
+const { Tree, TreeUpdate, User } = require('./tree')
 const cors = require('cors')
 const multer = require('multer')
 const fs = require('fs')
 const path = require('path')
+const crypto = require('crypto')
+const session = require('express-session')
+const { userInfo } = require('os')
+const jwt = require('jsonwebtoken');
 
 const app = express()
 
@@ -25,6 +29,25 @@ morgan(function (tokens, req, res) {
 app.use(morgan(':method :url :status :res[content-length] - :response-time ms :data'))
 
 app.use(express.static('build'))
+// app.use(session({
+//   secret: process.env.SESSION_SECRET,
+//   saveUninitialized: true,
+//   resave: false,
+//   cookie: {
+//     httpOnly: true,
+//     maxAge: parseInt(process.env.SESSION_EXPIR)
+//   }
+// }))
+
+// app.use((req, res, next) => {
+//   console.log("Session:")
+//   console.log(req.session)
+//   next()
+// })
+
+const generateAccessToken = (username) => {
+  return jwt.sign(username, process.env.JWT_SECRET, { expiresIn: '1800s' })
+}
 
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
@@ -37,6 +60,15 @@ const storage = multer.diskStorage({
 
 const upload = multer({ storage: storage })
 
+app.get('/api/trees/session', (request, response) => {
+  const { user } = request.session
+  console.log("user", user)
+  if (!user) {
+    return response.json({ loggedin: 'false' })
+  } else {
+    return response.json({ loggedin: 'true', user: user })
+  }
+})
 
 app.get('/api/trees', (request, response) => {
   console.log("Tree", Tree)
@@ -75,20 +107,23 @@ app.post('/api/trees', upload.single('image'), (request, response, next) => {
   }
 
   const treeToAdd = request.body
-  console.log(request.body)
+  // console.log(request.body)
   const location = { latitude: treeToAdd.latitude, longitude: treeToAdd.longitude}
 
-  console.log(request.file)
+  // console.log(request.file)
 
   const tree = new Tree({
     name: treeToAdd.name,
-    number: treeToAdd.number,
+    user: treeToAdd.userName,
+    numberPlanted: treeToAdd.numberPlanted,
     location: location,
     image: {
       data: fs.readFileSync(path.join(__dirname + '/uploads/' + request.file.filename)),
       contentType: request.file.mimetype,
-  }
+    },
+    userId: treeToAdd.userId
   })
+  
 
   tree.save().then(savedTree => {
     response.json(savedTree)
@@ -105,19 +140,65 @@ app.post('/api/trees/:id/update', upload.single('image'), (request, response, ne
 
   const treeUpdate = new TreeUpdate({
     treeId: request.params.id,
-    user: request.body.user,
+    user: request.body.userName,
     text: request.body.text,
     image: {
       data: fs.readFileSync(path.join(__dirname + '/uploads/' + request.file.filename)),
       contentType: request.file.mimetype,
-    }
+    },
+    userId: request.body.userId
   })
 
   treeUpdate.save().then(savedUpdate => {
     response.json(savedUpdate)
   })
-  .catch(error => {
-    next(error)
+  .catch(error => next(error))
+})
+
+app.post('/api/trees/registeruser', (request, response, next) => {
+
+  const passwordHashing = hashPassword(request.body.password)
+  // console.log(passwordHashing[0], passwordHashing[1])
+  
+  const newUser = new User({
+    userName: request.body.name,
+    userEmail: request.body.email,
+    passwordHash: passwordHashing[0],
+    salt: passwordHashing[1]
+  })
+
+  newUser.save().then(savedUser => {
+    // response.json(savedUser)
+    const token = generateAccessToken({ username: req.body.email });
+    const userInfo = {
+      userId: savedUser.id,
+      userName: savedUser.userName,
+      token: token
+    }
+    response.json(userInfo)
+  })
+  .catch(error => next(error))
+})
+
+app.post('/api/trees/login', (request, response, next) => {
+  User.find({ userEmail: request.body.email }).then(user => {
+    if (user.length > 0) {
+      if(validPassword(request.body.password, user[0].passwordHash, user[0].salt)) {
+        const token = generateAccessToken({ username: user[0].email });
+        const userInfo = {
+          userId: user[0].id,
+          userName: user[0].userName,
+          token: token
+        }
+        response.json(userInfo)
+      } else {
+        response.status(401)
+        response.send("wrong password")
+      }
+    } else {
+      response.status(401)
+      response.send("wrong email")
+    }
   })
 })
 
@@ -178,6 +259,25 @@ const errorHandler = (error, request, response, next) => {
 }
 
 app.use(errorHandler)
+
+hashPassword = (password) => {
+  // Creating a unique salt for a particular user 
+  const salt = crypto.randomBytes(16).toString('hex')
+  
+  // Hashing user's salt and password with 1000 iterations, 
+  const passwordHash = crypto.pbkdf2Sync(password, salt,  
+  1000, 64, `sha512`).toString(`hex`)
+
+  console.log("passwordHash", passwordHash)
+  console.log("salt", salt)
+
+  return [passwordHash, salt]
+}
+
+validPassword = (password, hashedPassword, salt) => { 
+  let hash = crypto.pbkdf2Sync(password, salt, 1000, 64, `sha512`).toString(`hex`)
+  return hashedPassword === hash
+}; 
 
 const PORT = process.env.PORT || 8080
 

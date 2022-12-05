@@ -23,23 +23,16 @@ const treeSchema = new mongoose.Schema({
   numberPlanted: {
     type: String,
     minLength: 1,
-    validate: {
-      validator: (v) => {
-        if (!Number.isInteger(v)) {
-          return false
-        }
-        return true
-      },
-      message: (props) => { // eslint-disable-line no-unused-vars
-        return 'The amount planted has to be positive whole numbers'
-      }
-    }
   },
   location: {
     type: Object,
     required: true,
   },
   image: { data: Buffer, contentType: String },
+  userId: {
+    type: String,
+    default: ""
+  }
 }, { timestamps: true })
 
 const treeUpdateSchema = new mongoose.Schema({
@@ -55,7 +48,27 @@ const treeUpdateSchema = new mongoose.Schema({
     type: String
   },
   image: { data: Buffer, contentType: String },
+  userId: {
+    type: String,
+    default: ""
+  }
 }, { timestamps: true })
+
+const userSchema = new mongoose.Schema({
+  userName: {
+    type: String,
+    required: true,
+  },
+  userEmail: {
+    type: String,
+    required: true
+  },
+  passwordHash: {
+    type: String,
+    required: true
+  },
+  salt: String
+})
 
 treeSchema.set('toJSON', {
   transform: (document, returnedObject) => {
@@ -73,7 +86,16 @@ treeUpdateSchema.set('toJSON', {
   }
 })
 
+userSchema.set('toJSON', {
+  transform: (document, returnedObject) => {
+    returnedObject.id = returnedObject._id.toString()
+    delete returnedObject._id
+    delete returnedObject.__v
+  }
+})
+
 const Tree = mongoose.model('Tree', treeSchema)
 const TreeUpdate = mongoose.model('TreeUpdate', treeUpdateSchema)
+const User = mongoose.model('User', userSchema)
 
-module.exports = { Tree, TreeUpdate }
+module.exports = { Tree, TreeUpdate, User }
