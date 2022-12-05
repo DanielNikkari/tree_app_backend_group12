@@ -94,6 +94,13 @@ app.get('/api/trees/:id', (request, response, next) => {
     .catch(error => next(error))
 })
 
+app.get('/api/trees/userProfile/:id', (request, response, next) => {
+  Tree.find({ userId: request.params.id }).then(userTrees => {
+    response.json(userTrees)
+  })
+  .catch(error => next(error))
+})
+
 app.post('/api/trees', upload.single('image'), (request, response, next) => {
   if (!request.body.name) {
     return response.status(400).json({
