@@ -7,9 +7,8 @@ const multer = require('multer')
 const fs = require('fs')
 const path = require('path')
 const crypto = require('crypto')
-const session = require('express-session')
-const { userInfo } = require('os')
-const jwt = require('jsonwebtoken');
+// const session = require('express-session')
+// const jwt = require('jsonwebtoken');
 
 const app = express()
 
@@ -45,9 +44,9 @@ app.use(express.static('build'))
 //   next()
 // })
 
-const generateAccessToken = (username) => {
-  return jwt.sign(username, process.env.JWT_SECRET, { expiresIn: '1800s' })
-}
+// const generateAccessToken = (username) => {
+//   return jwt.sign(username, process.env.JWT_SECRET, { expiresIn: '1800s' })
+// }
 
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
@@ -60,15 +59,15 @@ const storage = multer.diskStorage({
 
 const upload = multer({ storage: storage })
 
-app.get('/api/trees/session', (request, response) => {
-  const { user } = request.session
-  console.log("user", user)
-  if (!user) {
-    return response.json({ loggedin: 'false' })
-  } else {
-    return response.json({ loggedin: 'true', user: user })
-  }
-})
+// app.get('/api/trees/session', (request, response) => {
+//   const { user } = request.session
+//   console.log("user", user)
+//   if (!user) {
+//     return response.json({ loggedin: 'false' })
+//   } else {
+//     return response.json({ loggedin: 'true', user: user })
+//   }
+// })
 
 app.get('/api/trees', (request, response) => {
   console.log("Tree", Tree)
@@ -169,11 +168,11 @@ app.post('/api/trees/registeruser', (request, response, next) => {
 
   newUser.save().then(savedUser => {
     // response.json(savedUser)
-    const token = generateAccessToken({ username: req.body.email });
+    // const token = generateAccessToken({ username: request.body.email })
     const userInfo = {
       userId: savedUser.id,
       userName: savedUser.userName,
-      token: token
+      // token: token
     }
     response.json(userInfo)
   })
@@ -184,11 +183,11 @@ app.post('/api/trees/login', (request, response, next) => {
   User.find({ userEmail: request.body.email }).then(user => {
     if (user.length > 0) {
       if(validPassword(request.body.password, user[0].passwordHash, user[0].salt)) {
-        const token = generateAccessToken({ username: user[0].email });
+        // const token = generateAccessToken({ username: user[0].email })
         const userInfo = {
           userId: user[0].id,
           userName: user[0].userName,
-          token: token
+          // token: token
         }
         response.json(userInfo)
       } else {
