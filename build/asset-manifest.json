@@ -1,23 +1,32 @@
 {
   "files": {
-    "main.css": "/static/css/main.bb2b8dbf.css",
-    "main.js": "/static/js/main.3ce7712c.js",
+    "main.css": "/static/css/main.3760fa18.css",
+    "main.js": "/static/js/main.aae4e6da.js",
     "static/media/fa-solid-900.ttf": "/static/media/fa-solid-900.b1a653db79258eeccc5d.ttf",
     "static/media/fa-brands-400.ttf": "/static/media/fa-brands-400.450a5c898f0b184b968b.ttf",
     "static/media/fa-solid-900.woff2": "/static/media/fa-solid-900.41c0f706d8ce93933771.woff2",
     "static/media/test_img.jpg": "/static/media/test_img.c2a56c3b226d99529198.jpg",
     "static/media/fa-brands-400.woff2": "/static/media/fa-brands-400.3ac6859b28be946745f9.woff2",
+    "static/media/InriaSerif-Regular.ttf": "/static/media/InriaSerif-Regular.f43b3e7fe0caf2aaeade.ttf",
     "static/media/fa-regular-400.ttf": "/static/media/fa-regular-400.3cd9fb8fcec4ad0f99d4.ttf",
     "static/media/logo.svg": "/static/media/logo.2b30e75384b3977a4639e4e894084a19.svg",
     "static/media/fa-regular-400.woff2": "/static/media/fa-regular-400.1f3772178d9e5bed38a6.woff2",
+    "static/media/Register.svg": "/static/media/Register.584ed162b00c1a64f23e9b9e1040efea.svg",
+    "static/media/Register_light.svg": "/static/media/Register_light.57b82b386925265ddcab8c58c4972e71.svg",
     "static/media/fa-v4compatibility.ttf": "/static/media/fa-v4compatibility.e314b618134d5be20996.ttf",
+    "static/media/List_light.svg": "/static/media/List_light.9f53b865ed5c15a8aa934a6113118e3e.svg",
+    "static/media/List.svg": "/static/media/List.2065f644b739eaeb950b7ee0d5b7151f.svg",
+    "static/media/Profile.svg": "/static/media/Profile.905466effcd6273d1f79637928214dcc.svg",
+    "static/media/Profile_light.svg": "/static/media/Profile_light.197051e4f50f2dc80e74d64efa4e4152.svg",
+    "static/media/Home.svg": "/static/media/Home.0c7c68ba223bbb7c24e3dba8f1052a62.svg",
+    "static/media/Home_light.svg": "/static/media/Home_light.045d8c0a5ae2144c043a5e954645b1f7.svg",
     "static/media/fa-v4compatibility.woff2": "/static/media/fa-v4compatibility.4ee7f902d88f819e251c.woff2",
     "index.html": "/index.html",
-    "main.bb2b8dbf.css.map": "/static/css/main.bb2b8dbf.css.map",
-    "main.3ce7712c.js.map": "/static/js/main.3ce7712c.js.map"
+    "main.3760fa18.css.map": "/static/css/main.3760fa18.css.map",
+    "main.aae4e6da.js.map": "/static/js/main.aae4e6da.js.map"
   },
   "entrypoints": [
-    "static/css/main.bb2b8dbf.css",
-    "static/js/main.3ce7712c.js"
+    "static/css/main.3760fa18.css",
+    "static/js/main.aae4e6da.js"
   ]
 }

@@ -102,13 +102,26 @@ app.get('/api/trees/userProfile/:id', (request, response, next) => {
 })
 
 app.post('/api/trees', upload.single('image'), (request, response, next) => {
+  
   if (!request.body.name) {
     return response.status(400).json({
-      error: 'name missing'
+      error: 'Name missing'
     })
   } else if (!request.body.numberPlanted) {
     return response.status(400).json({
-      error: 'number planted missing'
+      error: 'Number planted missing'
+    })
+  } else if (!request.body.latitude) {
+    return response.status(400).json({
+      error: 'Please, enter latitude'
+    })
+  } else if (!request.body.longitude) {
+    return response.status(400).json({
+      error: 'Please, enter longitude'
+    })
+  } else if (!request.file) {
+    return response.status(400).json({
+      error: 'Please, add a image of the tree'
     })
   }
 
