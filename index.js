@@ -71,7 +71,7 @@ const upload = multer({ storage: storage })
 
 app.get('/api/trees', (request, response) => {
   console.log("Tree", Tree)
-  Tree.find({}).then(trees => {
+  Tree.find({}).sort({createdAt: -1}).then(trees => {
   // response.json(trees)
     response.json(trees)
   })
@@ -121,7 +121,7 @@ app.post('/api/trees', upload.single('image'), (request, response, next) => {
     })
   } else if (!request.file) {
     return response.status(400).json({
-      error: 'Please, add a image of the tree'
+      error: 'Please, add an image of the tree'
     })
   }
 
@@ -156,6 +156,12 @@ app.post('/api/trees', upload.single('image'), (request, response, next) => {
 app.post('/api/trees/:id/update', upload.single('image'), (request, response, next) => {
 
   console.log("id", request.params.id)
+
+  if (!request.file) {
+    return response.status(400).json({
+      error: 'Please, add an image file'
+  })
+  }
 
   const treeUpdate = new TreeUpdate({
     treeId: request.params.id,
@@ -249,7 +255,7 @@ app.put('/api/trees/:id', (request, response, next) => {
 })
 
 app.get('/api/trees/getupdates/:treeId', (request, response, next) => {
-  TreeUpdate.find({ treeId: request.params.treeId }).then(treeUpdates => {
+  TreeUpdate.find({ treeId: request.params.treeId }).sort({createdAt: -1}).then(treeUpdates => {
     response.json(treeUpdates)
   })
   .catch(error => next(error))

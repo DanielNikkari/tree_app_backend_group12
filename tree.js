@@ -45,7 +45,8 @@ const treeUpdateSchema = new mongoose.Schema({
     default: "unnamed"
   },
   text: {
-    type: String
+    type: String,
+    default: ""
   },
   image: { data: Buffer, contentType: String },
   userId: {
