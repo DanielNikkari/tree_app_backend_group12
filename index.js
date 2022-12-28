@@ -7,15 +7,13 @@ const multer = require('multer')
 const fs = require('fs')
 const path = require('path')
 const crypto = require('crypto')
-// const session = require('express-session')
-// const jwt = require('jsonwebtoken');
 
 const app = express()
 
 app.use(cors())
 app.use(express.json())
 
-morgan.token('data', function (req, res) { return JSON.stringify(req.body) }) // eslint-disable-line no-unused-vars
+morgan.token('data', function (req, res) { return JSON.stringify(req.body) })
 morgan(function (tokens, req, res) {
   return [
     tokens.method(req, res),
@@ -28,25 +26,6 @@ morgan(function (tokens, req, res) {
 app.use(morgan(':method :url :status :res[content-length] - :response-time ms :data'))
 
 app.use(express.static('build'))
-// app.use(session({
-//   secret: process.env.SESSION_SECRET,
-//   saveUninitialized: true,
-//   resave: false,
-//   cookie: {
-//     httpOnly: true,
-//     maxAge: parseInt(process.env.SESSION_EXPIR)
-//   }
-// }))
-
-// app.use((req, res, next) => {
-//   console.log("Session:")
-//   console.log(req.session)
-//   next()
-// })
-
-// const generateAccessToken = (username) => {
-//   return jwt.sign(username, process.env.JWT_SECRET, { expiresIn: '1800s' })
-// }
 
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
@@ -58,16 +37,6 @@ const storage = multer.diskStorage({
 });
 
 const upload = multer({ storage: storage })
-
-// app.get('/api/trees/session', (request, response) => {
-//   const { user } = request.session
-//   console.log("user", user)
-//   if (!user) {
-//     return response.json({ loggedin: 'false' })
-//   } else {
-//     return response.json({ loggedin: 'true', user: user })
-//   }
-// })
 
 app.get('/api/trees', (request, response) => {
   console.log("Tree", Tree)
@@ -101,6 +70,17 @@ app.get('/api/trees/userProfile/:id', (request, response, next) => {
   .catch(error => next(error))
 })
 
+app.get('/api/trees/getupdates/:treeId', (request, response, next) => {
+  TreeUpdate.find({ treeId: request.params.treeId }).sort({createdAt: -1}).then(treeUpdates => {
+    response.json(treeUpdates)
+  })
+  .catch(error => next(error))
+})
+
+app.get('*', (req,res) =>{
+  res.sendFile(path.join(__dirname+'/build/index.html'))
+})
+
 app.post('/api/trees', upload.single('image'), (request, response, next) => {
   
   if (!request.body.name) {
@@ -126,10 +106,7 @@ app.post('/api/trees', upload.single('image'), (request, response, next) => {
   }
 
   const treeToAdd = request.body
-  // console.log(request.body)
   const location = { latitude: treeToAdd.latitude, longitude: treeToAdd.longitude}
-
-  // console.log(request.file)
 
   const tree = new Tree({
     name: treeToAdd.name,
@@ -193,12 +170,9 @@ app.post('/api/trees/registeruser', (request, response, next) => {
   })
 
   newUser.save().then(savedUser => {
-    // response.json(savedUser)
-    // const token = generateAccessToken({ username: request.body.email })
     const userInfo = {
       userId: savedUser.id,
       userName: savedUser.userName,
-      // token: token
     }
     response.json(userInfo)
   })
@@ -209,11 +183,9 @@ app.post('/api/trees/login', (request, response, next) => {
   User.find({ userEmail: request.body.email }).then(user => {
     if (user.length > 0) {
       if(validPassword(request.body.password, user[0].passwordHash, user[0].salt)) {
-        // const token = generateAccessToken({ username: user[0].email })
         const userInfo = {
           userId: user[0].id,
           userName: user[0].userName,
-          // token: token
         }
         response.json(userInfo)
       } else {
@@ -229,7 +201,7 @@ app.post('/api/trees/login', (request, response, next) => {
 
 app.delete('/api/trees/:id', (request, response, next) => {
 
-  Tree.findByIdAndRemove(request.params.id).then(result => { // eslint-disable-line no-unused-vars
+  Tree.findByIdAndRemove(request.params.id).then(result => {
     response.status(204).end()
   })
     .catch(error => {
@@ -254,23 +226,6 @@ app.put('/api/trees/:id', (request, response, next) => {
     .catch(error => next(error))
 })
 
-app.get('/api/trees/getupdates/:treeId', (request, response, next) => {
-  TreeUpdate.find({ treeId: request.params.treeId }).sort({createdAt: -1}).then(treeUpdates => {
-    response.json(treeUpdates)
-  })
-  .catch(error => next(error))
-})
-
-app.get('*', (req,res) =>{
-  res.sendFile(path.join(__dirname+'/build/index.html'));
-});
-
-// const unknownEndpoint = (request, response) => {
-//   response.status(404).send({ error: 'unknown endpoint' })
-// }
-
-// app.use(unknownEndpoint)
-
 const errorHandler = (error, request, response, next) => {
   console.log(error.message)
 
@@ -286,10 +241,10 @@ const errorHandler = (error, request, response, next) => {
 app.use(errorHandler)
 
 hashPassword = (password) => {
-  // Creating a unique salt for a particular user 
+  // Creating a unique salt for a particular user
   const salt = crypto.randomBytes(16).toString('hex')
   
-  // Hashing user's salt and password with 1000 iterations, 
+  // Hashing user's salt and password with 1000 iterations
   const passwordHash = crypto.pbkdf2Sync(password, salt,  
   1000, 64, `sha512`).toString(`hex`)
 
